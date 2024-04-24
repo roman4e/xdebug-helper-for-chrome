@@ -8,6 +8,7 @@
 		localStorage["xdebugIdeKey"] = document.getElementById("idekey").value;
 		localStorage["xdebugTraceTrigger"] = document.getElementById("tracetrigger").value;
 		localStorage["xdebugProfileTrigger"] = document.getElementById("profiletrigger").value;
+		localStorage["xdebugTriggerTrigger"] = document.getElementById("triggertrigger").value;
 		localStorage.xdebugDisablePopup = document.getElementById('disable-popup').checked ? '1' : '0';
 	}
 
@@ -47,6 +48,14 @@
 			$("#profiletrigger").val(profileTrigger);
 		} else {
 			$("#profiletrigger").val(null);
+		}
+
+		// Restore Trigger Triggers
+		var triggerTrigger = localStorage["xdebugTriggerTrigger"];
+		if (triggerTrigger !== null)	{
+			$("#triggertrigger").val(triggerTrigger);
+		} else {
+			$("#triggertrigger").val(null);
 		}
 
 		// Restore Disable Popup

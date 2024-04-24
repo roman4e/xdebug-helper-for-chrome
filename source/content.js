@@ -47,6 +47,7 @@ var xdebug = (function() {
 				idekey = "XDEBUG_ECLIPSE",
 				traceTrigger = idekey,
 				profileTrigger = idekey;
+				triggerTrigger = idekey;
 
 			// Use the IDE key from the request, if any is given
 			if (request.idekey)
@@ -61,19 +62,23 @@ var xdebug = (function() {
 			{
 				profileTrigger = request.profileTrigger;
 			}
+			if (request.triggerTrigger)
+			{
+				triggerTrigger = request.triggerTrigger;
+			}
 
 			// Execute the requested command
 			if (request.cmd == "getStatus")
 			{
-				newStatus = exposed.getStatus(idekey, traceTrigger, profileTrigger);
+				newStatus = exposed.getStatus(idekey, traceTrigger, profileTrigger, triggerTrigger);
 			}
 			else if (request.cmd == "toggleStatus")
 			{
-				newStatus = exposed.toggleStatus(idekey, traceTrigger, profileTrigger);
+				newStatus = exposed.toggleStatus(idekey, traceTrigger, profileTrigger, triggerTrigger);
 			}
 			else if (request.cmd == "setStatus")
 			{
-				newStatus = exposed.setStatus(request.status, idekey, traceTrigger, profileTrigger);
+				newStatus = exposed.setStatus(request.status, idekey, traceTrigger, profileTrigger, triggerTrigger);
 			}
 
 			// Respond with the current status
@@ -81,7 +86,7 @@ var xdebug = (function() {
 		},
 
 		// Get current state
-		getStatus : function(idekey, traceTrigger, profileTrigger)
+		getStatus : function(idekey, traceTrigger, profileTrigger, triggerTrigger)
 		{
 			var status = 0;
 
@@ -97,19 +102,23 @@ var xdebug = (function() {
 			{
 				status = 3;
 			}
+			else if (getCookie("XDEBUG_TRIGGER") == triggerTrigger)
+			{
+				status = 4;
+			}
 
 			return status;
 		},
 
 		// Toggle to the next state
-		toggleStatus : function(idekey, traceTrigger, profileTrigger)
+		toggleStatus : function(idekey, traceTrigger, profileTrigger, triggerTrigger)
 		{
-			var nextStatus = (exposed.getStatus(idekey, traceTrigger, profileTrigger) + 1) % 4;
-			return exposed.setStatus(nextStatus, idekey, traceTrigger, profileTrigger);
+			var nextStatus = (exposed.getStatus(idekey, traceTrigger, profileTrigger, triggerTrigger) + 1) % 5;
+			return exposed.setStatus(nextStatus, idekey, traceTrigger, profileTrigger, triggerTrigger);
 		},
 
 		// Set the state
-		setStatus : function(status, idekey, traceTrigger, profileTrigger)
+		setStatus : function(status, idekey, traceTrigger, profileTrigger, triggerTrigger)
 		{
 			if (status == 1)
 			{
@@ -117,6 +126,7 @@ var xdebug = (function() {
 				setCookie("XDEBUG_SESSION", idekey, 365);
 				deleteCookie("XDEBUG_PROFILE");
 				deleteCookie("XDEBUG_TRACE");
+				deleteCookie("XDEBUG_TRIGGER");
 			}
 			else if (status == 2)
 			{
@@ -124,7 +134,7 @@ var xdebug = (function() {
 				deleteCookie("XDEBUG_SESSION");
 				setCookie("XDEBUG_PROFILE", profileTrigger, 365);
 				deleteCookie("XDEBUG_TRACE");
-
+				deleteCookie("XDEBUG_TRIGGER");
 			}
 			else if (status == 3)
 			{
@@ -132,6 +142,14 @@ var xdebug = (function() {
 				deleteCookie("XDEBUG_SESSION");
 				deleteCookie("XDEBUG_PROFILE");
 				setCookie("XDEBUG_TRACE", traceTrigger, 365);
+				deleteCookie("XDEBUG_TRIGGER");
+			}
+			else if (status == 4)
+			{
+				deleteCookie("XDEBUG_SESSION");
+				deleteCookie("XDEBUG_PROFILE");
+				deleteCookie("XDEBUG_TRACE");
+				setCookie("XDEBUG_TRIGGER", triggerTrigger, 365);
 			}
 			else
 			{
@@ -139,10 +157,11 @@ var xdebug = (function() {
 				deleteCookie("XDEBUG_SESSION");
 				deleteCookie("XDEBUG_PROFILE");
 				deleteCookie("XDEBUG_TRACE");
+				deleteCookie("XDEBUG_TRIGGER");
 			}
 
 			// Return the new status
-			return exposed.getStatus(idekey, traceTrigger, profileTrigger);
+			return exposed.getStatus(idekey, traceTrigger, profileTrigger, triggerTrigger);
 		}
 	};
 
