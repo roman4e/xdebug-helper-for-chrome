@@ -12,6 +12,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab)
 		match = true,
 		traceTrigger = ideKey,
 		profileTrigger = ideKey,
+		triggerTrigger = idekey,
 		domain;
 
 	// Check if localStorage is available and get the settings out of it
@@ -31,6 +32,11 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab)
 		{
 			profileTrigger = localStorage["xdebugProfileTrigger"];
 		}
+
+		if (localStorage["xdebugTriggerTrigger"])
+		{
+			profileTrigger = localStorage["xdebugTriggerTrigger"];
+		}
 	}
 
 	// Request the current status and update the icon accordingly
@@ -40,7 +46,8 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab)
 			cmd: "getStatus",
 			idekey: ideKey,
 			traceTrigger: traceTrigger,
-			profileTrigger: profileTrigger
+			profileTrigger: profileTrigger,
+			triggerTrigger: triggerTrigger
 		},
 		function(response)
 		{
@@ -62,6 +69,7 @@ chrome.commands.onCommand.addListener(function(command)
 		var ideKey = "XDEBUG_ECLIPSE";
 		var traceTrigger = ideKey;
 		var profileTrigger = ideKey;
+		var triggerTrigger = idekey;
 
 		// Check if localStorage is available and get the settings out of it
 		if (localStorage)
@@ -80,6 +88,11 @@ chrome.commands.onCommand.addListener(function(command)
 			{
 				profileTrigger = localStorage["xdebugProfileTrigger"];
 			}
+
+			if (localStorage["xdebugTriggerTrigger"])
+			{
+				triggerTrigger = localStorage["xdebugTriggerTrigger"];
+			}
 		}
 
 		// Fetch the active tab
@@ -97,7 +110,8 @@ chrome.commands.onCommand.addListener(function(command)
 					cmd: "getStatus",
 					idekey: ideKey,
 					traceTrigger: traceTrigger,
-					profileTrigger: profileTrigger
+					profileTrigger: profileTrigger,
+					triggerTrigger: triggerTrigger
 				},
 				function(response)
 				{
@@ -111,7 +125,8 @@ chrome.commands.onCommand.addListener(function(command)
 							status: newStatus,
 							idekey: ideKey,
 							traceTrigger: traceTrigger,
-							profileTrigger: profileTrigger
+							profileTrigger: profileTrigger,
+							triggerTrigger: triggerTrigger
 						},
 						function(response)
 						{
@@ -130,6 +145,7 @@ chrome.browserAction.onClicked.addListener((tab) => {
     var ideKey = "XDEBUG_ECLIPSE";
     var traceTrigger = ideKey;
     var profileTrigger = ideKey;
+    var triggerTrigger = idekey;
 
     // Check if localStorage is available and get the settings out of it
     if (localStorage)
@@ -148,6 +164,11 @@ chrome.browserAction.onClicked.addListener((tab) => {
         {
             profileTrigger = localStorage["xdebugProfileTrigger"];
         }
+
+        if (localStorage["xdebugTriggerTrigger"])
+        {
+            triggerTrigger = localStorage["xdebugTriggerTrigger"];
+        }
     }
 
     // Get the current state
@@ -157,7 +178,8 @@ chrome.browserAction.onClicked.addListener((tab) => {
             cmd: "getStatus",
             idekey: ideKey,
             traceTrigger: traceTrigger,
-            profileTrigger: profileTrigger
+            profileTrigger: profileTrigger,
+            triggerTrigger: triggerTrigger
         },
         function(response)
         {
@@ -171,7 +193,8 @@ chrome.browserAction.onClicked.addListener((tab) => {
                     status: newStatus,
                     idekey: ideKey,
                     traceTrigger: traceTrigger,
-                    profileTrigger: profileTrigger
+                    profileTrigger: profileTrigger,
+		            triggerTrigger: triggerTrigger
                 },
                 function(response)
                 {
@@ -193,7 +216,7 @@ chrome.browserAction.onClicked.addListener((tab) => {
 function getNewStatus(status) {
     // Reset status, when trace or profile is selected and popup is disabled
     if ((localStorage.xdebugDisablePopup === '1')
-        && ((status === 2) || (status === 3))
+        && ((status === 2) || (status === 3) || (status === 4))
     ) {
         return 0;
     }
@@ -206,7 +229,7 @@ function updateIcon(status, tabId)
 {
 	// Reset status, when trace or profile is selected and popup is disabled
     if ((localStorage.xdebugDisablePopup === '1')
-		&& ((status === 2) || (status === 3))
+		&& ((status === 2) || (status === 3) || (status === 4))
 	) {
         status = 0;
     }
@@ -214,7 +237,7 @@ function updateIcon(status, tabId)
     // Figure the correct title / image by the given state
 	let image = "images/bug-gray.png";
     let title = (localStorage.xdebugDisablePopup === '1')
-		? 'Debugging disabled' : 'Debugging, profiling & tracing disabled';
+		? 'Debugging disabled' : 'Debugging, profiling, tracing & trigger disabled';
 
     if (status == 1)
 	{
@@ -230,6 +253,11 @@ function updateIcon(status, tabId)
 	{
 		title = "Tracing enabled";
 		image = "images/script.png";
+	}
+	else if (status == 4)
+	{
+		title = "Trigger enabled";
+		image = "images/bug.png";
 	}
 
 	// Update title
